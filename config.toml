@@ -22,3 +22,9 @@ rv-brand = "inotia00 ReVanced"
 arch = "arm64-v8a"
 build-mode = "module"
 
+[GooglePhotos]
+build-mode = "apk"
+arch = "arm64-v8a"
+version = "auto"
+apkmirror-dlurl = "https://www.apkmirror.com/apk/google-inc/photos/"
+uptodown-dlurl = "https://google-photos.en.uptodown.com/android"
