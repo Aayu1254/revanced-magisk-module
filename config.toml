@@ -26,7 +26,6 @@ uptodown-dlurl = "https://google-photos.en.uptodown.com/android"
 [Spotify]
 uptodown-dlurl = "https://spotify.en.uptodown.com/android"
 archive-dlurl = "https://archive.org/download/jhc-apks/apks/com.spotify.music"
-apkmirror-dlurl = "https://www.apkmirror.com/apk/spotify-ab/spotify-music-podcasts/"
 version = "auto"
 patches-source = "anddea/revanced-patches"
 rv-brand = "ReVanced Andea"
