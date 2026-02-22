@@ -36,6 +36,7 @@ patches-source = "anddea/revanced-patches"
 cli-source = "revanced/revanced-cli"
 
 [Music-Morphe]
+enabled = false
 app-name = "Music"
 patches-source = "MorpheApp/morphe-patches"
 cli-source = "MorpheApp/morphe-cli"
