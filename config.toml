@@ -1,5 +1,5 @@
 enable-module-update = true # set this to false if you do not want to receive updates for the module
-parallel-jobs = 1
+#parallel-jobs = 1
 
 # add 'enabled = false' for not patching a specific app or remove it from the config
 # see https://github.com/j-hc/revanced-magisk-module/blob/main/CONFIG.md for more detailed explanations
@@ -7,6 +7,7 @@ parallel-jobs = 1
 # you can use rvmm-config-gen to generate a config
 
 [YouTube]
+enabled = false
 build-mode = "both"
 arch = "arm64-v8a"
 apkmirror-dlurl = "https://www.apkmirror.com/apk/google-inc/youtube"
@@ -18,17 +19,18 @@ cli-source = "MorpheApp/morphe-cli"
 rv-brand = "Anddea"
 
 [YouTube-Morphe]
-enabled = false
 app-name = "YouTube"
+build-mode = "both"
+arch = "arm64-v8a"
 patches-source = "MorpheApp/morphe-patches"
 cli-source = "MorpheApp/morphe-cli"
 rv-brand = "Morphe"
-build-mode = "both"
 apkmirror-dlurl = "https://www.apkmirror.com/apk/google-inc/youtube"
 uptodown-dlurl = "https://youtube.en.uptodown.com/android"
 archive-dlurl = "https://archive.org/download/jhc-apks/apks/com.google.android.youtube"
 
 [Music]
+enabled = false
 build-mode = "both"
 arch = "arm64-v8a"
 apkmirror-dlurl = "https://www.apkmirror.com/apk/google-inc/youtube-music"
@@ -40,13 +42,12 @@ cli-source = "MorpheApp/morphe-cli"
 rv-brand = "Anddea"
 
 [Music-Morphe]
-enabled = false
 app-name = "Music"
+build-mode = "both"
+arch = "arm64-v8a"
 patches-source = "MorpheApp/morphe-patches"
 cli-source = "MorpheApp/morphe-cli"
 rv-brand = "Morphe"
-build-mode = "both"
-arch = "both"
 apkmirror-dlurl = "https://www.apkmirror.com/apk/google-inc/youtube-music"
 uptodown-dlurl = "https://youtube-music.en.uptodown.com/android"
 archive-dlurl = "https://archive.org/download/jhc-apks/apks/com.google.android.apps.youtube.music"
