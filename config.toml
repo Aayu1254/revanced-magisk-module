@@ -9,7 +9,6 @@ enable-module-update = true # set this to false if you do not want to receive up
 [YouTube]
 enabled = false
 build-mode = "both"
-arch = "arm64-v8a"
 apkmirror-dlurl = "https://www.apkmirror.com/apk/google-inc/youtube"
 uptodown-dlurl = "https://youtube.en.uptodown.com/android"
 archive-dlurl = "https://archive.org/download/jhc-apks/apks/com.google.android.youtube"
@@ -19,9 +18,9 @@ cli-source = "MorpheApp/morphe-cli"
 rv-brand = "Anddea"
 
 [YouTube-Morphe]
+enabled = false
 app-name = "YouTube"
 build-mode = "both"
-arch = "arm64-v8a"
 patches-source = "MorpheApp/morphe-patches"
 cli-source = "MorpheApp/morphe-cli"
 rv-brand = "Morphe"
@@ -30,9 +29,7 @@ uptodown-dlurl = "https://youtube.en.uptodown.com/android"
 archive-dlurl = "https://archive.org/download/jhc-apks/apks/com.google.android.youtube"
 
 [Music]
-enabled = false
 build-mode = "both"
-arch = "arm64-v8a"
 apkmirror-dlurl = "https://www.apkmirror.com/apk/google-inc/youtube-music"
 uptodown-dlurl = "https://youtube-music.en.uptodown.com/android"
 archive-dlurl = "https://archive.org/download/jhc-apks/apks/com.google.android.apps.youtube.music"
@@ -42,9 +39,9 @@ cli-source = "MorpheApp/morphe-cli"
 rv-brand = "Anddea"
 
 [Music-Morphe]
+enabled = false
 app-name = "Music"
 build-mode = "both"
-arch = "arm64-v8a"
 patches-source = "MorpheApp/morphe-patches"
 cli-source = "MorpheApp/morphe-cli"
 rv-brand = "Morphe"
