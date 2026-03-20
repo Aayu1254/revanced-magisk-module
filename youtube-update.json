@@ -1,6 +1,6 @@
 {
-  "version": "v20.40.45 (patches 6.1.0.rvp)",
-  "versionCode": 64,
-  "zipUrl": "https://github.com/Aayu1254/revanced-magisk-module/releases/download/64/youtube-revanced-module-v20.40.45-all.zip",
+  "version": "v20.05.46 (patches dev.8.mpp)",
+  "versionCode": 65,
+  "zipUrl": "https://github.com/Aayu1254/revanced-magisk-module/releases/download/65/youtube-anddea-module-v20.05.46-all.zip",
   "changelog": "https://raw.githubusercontent.com/Aayu1254/revanced-magisk-module/update/build.md"
 }
