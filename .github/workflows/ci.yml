@@ -50,6 +50,6 @@ jobs:
   build:
     permissions: write-all
     needs: check
-    uses: ./.github/workflows/build.yml
+    uses: Aayu1254/revanced-magisk-module/.github/workflows/build.yml@test
     if: ${{ needs.check.outputs.SHOULD_BUILD == 1 }}
     secrets: inherit
