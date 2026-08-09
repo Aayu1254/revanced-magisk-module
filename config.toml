@@ -6,16 +6,6 @@ parallel-jobs = 1
 
 # you can use rvmm-config-gen to generate a config
 
-[YouTube]
-enabled = false
-build-mode = "both"
-apkmirror-dlurl = "https://www.apkmirror.com/apk/google-inc/youtube"
-uptodown-dlurl = "https://youtube.en.uptodown.com/android"
-archive-dlurl = "https://archive.org/download/jhc-apks/apks/com.google.android.youtube"
-rv-brand = "Anddea"
-patches-source = "anddea/revanced-patches"
-cli-source = "MorpheApp/morphe-desktop"
-patches-version = "dev"
 
 [YouTube-Morphe]
 app-name = "YouTube"
@@ -26,20 +16,8 @@ build-mode = "both"
 # apkmirror-dlurl = "https://www.apkmirror.com/apk/google-inc/youtube"
 # uptodown-dlurl = "https://youtube.en.uptodown.com/android"
 # archive-dlurl = "https://archive.org/download/jhc-apks/apks/com.google.android.youtube"
-direct-dlurl = "https://github.com/Aayu1254/apk-vanced/releases/download/latest/com.google.android.youtube-21.26.360-all.apk"
-version = "21.26.360"
-
-[Music]
-enabled = false
-build-mode = "both"
-arch = "arm64-v8a"
-apkmirror-dlurl = "https://www.apkmirror.com/apk/google-inc/youtube-music"
-uptodown-dlurl = "https://youtube-music.en.uptodown.com/android"
-archive-dlurl = "https://archive.org/download/jhc-apks/apks/com.google.android.apps.youtube.music"
-rv-brand = "Anddea"
-patches-source = "anddea/revanced-patches"
-cli-source = "MorpheApp/morphe-desktop"
-patches-version = "dev"
+direct-dlurl = "https://github.com/Aayu1254/apk-vanced/releases/download/latest/com.google.android.youtube-latest-all.apk"
+version = "latest"
 
 [Music-Morphe]
 app-name = "Music"
@@ -51,8 +29,8 @@ arch = "arm64-v8a"
 # apkmirror-dlurl = "https://www.apkmirror.com/apk/google-inc/youtube-music"
 # uptodown-dlurl = "https://youtube-music.en.uptodown.com/android"
 # archive-dlurl = "https://archive.org/download/jhc-apks/apks/com.google.android.apps.youtube.music"
-direct-dlurl = "https://github.com/Aayu1254/apk-vanced/releases/download/latest/com.google.android.apps.youtube.music-9.30.52-arm64-v8a.apk"
-version = "9.30.52"
+direct-dlurl = "https://github.com/Aayu1254/apk-vanced/releases/download/latest/com.google.android.apps.youtube.music-latest-arm64-v8a.apk"
+version = "latest"
 
 [Reddit-Morphe]
 app-name = "Reddit"
@@ -63,9 +41,9 @@ cli-source = "MorpheApp/morphe-desktop"
 # apkmirror-dlurl = "https://www.apkmirror.com/apk/redditinc/reddit/"
 # archive-dlurl = "https://archive.org/download/jhc-apks/apks/com.reddit.frontpage"
 # uptodown-dlurl = "https://reddit-official-app.en.uptodown.com/android"
-direct-dlurl = "https://github.com/Aayu1254/apk-vanced/releases/download/latest/com.reddit.frontpage-2026.29.0-all.apkm"
+direct-dlurl = "https://github.com/Aayu1254/apk-vanced/releases/download/latest/com.reddit.frontpage-latest-all.apkm"
 dpi = "120-640dpi"
-version = "2026.29.0"
+version = "latest"
 
 [GooglePhotos-Morphe]
 build-mode = "apk"
@@ -81,7 +59,12 @@ direct-dlurl = "https://github.com/Aayu1254/apk-vanced/releases/download/latest/
 included-patches = "'Enable DCIM folders backup control'"
 version = "latest"
 
-[Spotify]
+[ProtonVPN-Morphe]
 enabled = false
-uptodown-dlurl = "https://spotify.en.uptodown.com/android"
-archive-dlurl = "https://archive.org/download/jhc-apks/apks/com.spotify.music"
+app-name = "ProtonVPN"
+rv-brand = "Morphe"
+build-mode = "apk"
+cli-source = "MorpheApp/morphe-desktop"
+patches-source = "gitlab:Paresh-Maheshwari/paresh-patches"
+direct-dlurl = "https://github.com/Aayu1254/apk-vanced/releases/download/latest/ch.protonvpn.android-latest-all.apkm"
+version = "latest"
