@@ -101,7 +101,12 @@ fetch_releases_json() {
 			if [ "$ver" = "dev" ]; then
 				echo "$resp"
 			else
-				jq -e '.[0]' <<<"$resp"
+				# GitLab has no /latest endpoint that skips pre-releases like GitHub.
+				# Filter out upcoming releases and tags with common pre-release suffixes.
+				jq -e '[.[] | select(
+					(.upcoming_release // false | not) and
+					(.tag_name | test("-alpha|-beta|-rc|-dev|-pre"; "i") | not)
+				)] | .[0]' <<<"$resp"
 			fi
 		else
 			req "${gl_rel}/${ver}" -
