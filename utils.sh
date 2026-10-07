@@ -65,36 +65,99 @@ java() {
 	fi
 }
 
+# Parses a source string and sets __PARSE_PROVIDER and __PARSE_REPO globals.
+# Supports: "owner/repo" (github default), "gitlab:owner/repo", "https://gitlab.com/owner/repo"
+parse_source() {
+	__PARSE_PROVIDER="github"
+	__PARSE_REPO="$1"
+
+	__PARSE_REPO="${__PARSE_REPO#http://}"
+	__PARSE_REPO="${__PARSE_REPO#https://}"
+
+	if [[ "$1" == gitlab:* ]] || [[ "$__PARSE_REPO" == gitlab.com/* ]]; then
+		__PARSE_PROVIDER="gitlab"
+		__PARSE_REPO="${__PARSE_REPO#gitlab:}"
+		__PARSE_REPO="${__PARSE_REPO#gitlab.com/}"
+	elif [[ "$1" == github:* ]] || [[ "$__PARSE_REPO" == github.com/* ]]; then
+		__PARSE_PROVIDER="github"
+		__PARSE_REPO="${__PARSE_REPO#github:}"
+		__PARSE_REPO="${__PARSE_REPO#github.com/}"
+	fi
+
+	__PARSE_REPO="${__PARSE_REPO%/}"
+}
+
+# Fetches release JSON from GitHub or GitLab.
+# Usage: fetch_releases_json <provider> <repo_path> <ver>
+fetch_releases_json() {
+	local provider="$1" repo_path="$2" ver="$3"
+	if [ "$provider" = "gitlab" ]; then
+		local encoded_path=""
+		encoded_path=$(sed 's|/|%2F|g' <<<"$repo_path")
+		local gl_rel="https://gitlab.com/api/v4/projects/${encoded_path}/releases"
+		if [ "$ver" = "dev" ] || [ "$ver" = "latest" ]; then
+			local resp=""
+			resp=$(req "$gl_rel" -) || return 1
+			if [ "$ver" = "dev" ]; then
+				echo "$resp"
+			else
+				# GitLab has no /latest endpoint that skips pre-releases like GitHub.
+				# Filter out upcoming releases and tags with common pre-release suffixes.
+				jq -e '[.[] | select(
+					(.upcoming_release // false | not) and
+					(.tag_name | test("-alpha|-beta|-rc|-dev|-pre"; "i") | not)
+				)] | .[0]' <<<"$resp"
+			fi
+		else
+			req "${gl_rel}/${ver}" -
+		fi
+	else
+		local rv_rel="https://api.github.com/repos/${repo_path}/releases"
+		if [ "$ver" = "dev" ]; then
+			gh_req "$rv_rel" -
+		elif [ "$ver" = "latest" ]; then
+			gh_req "${rv_rel}/latest" -
+		else
+			gh_req "${rv_rel}/tags/${ver}" -
+		fi
+	fi
+}
+
 get_prebuilts() {
-	local cli_src=$1 cli_ver=$2 patches_src=$3 patches_ver=$4
-	pr "Getting prebuilts (${patches_src%/*})" >&2
-	local cl_dir=${patches_src%/*}
-	cl_dir=${TEMP_DIR}/${cl_dir,,}-rv
-	[ -d "$cl_dir" ] || mkdir "$cl_dir"
+	local cli_src="$1" cli_ver="$2" patches_src="$3" patches_ver="$4"
+
+	parse_source "$patches_src"
+	local p_provider="$__PARSE_PROVIDER" p_repo="$__PARSE_REPO"
+
+	pr "Getting prebuilts (${p_repo%/*})" >&2
+	local cl_dir="${p_repo%/*}"
+	cl_dir="${TEMP_DIR}/${cl_dir,,}-rv"
+	[ -d "$cl_dir" ] || mkdir -p "$cl_dir"
 
 	for src_ver in "Patches $patches_src $patches_ver" "CLI $cli_src $cli_ver"; do
 		set -- $src_ver
-		local tag=$1 src=$2 ver=${3-}
+		local tag="$1" src="$2" ver="${3-}"
 
-		local dir=${src%/*}
-		dir=${TEMP_DIR}/${dir,,}-rv
-		[ -d "$dir" ] || mkdir "$dir"
+		parse_source "$src"
+		local provider="$__PARSE_PROVIDER" repo_path="$__PARSE_REPO"
 
-		local rv_rel="https://api.github.com/repos/${src}/releases" name_ver
+		local dir="${repo_path%/*}"
+		dir="${TEMP_DIR}/${dir,,}-rv"
+		[ -d "$dir" ] || mkdir -p "$dir"
+
+		local name_ver=""
 		if [ "$ver" = "dev" ]; then
-			local resp
-			resp=$(gh_req "$rv_rel" -) || return 1
+			local resp=""
+			resp=$(fetch_releases_json "$provider" "$repo_path" "$ver") || return 1
 			ver=$(jq -e -r '.[] | .tag_name' <<<"$resp" | get_highest_ver) || return 1
 		fi
 		if [ "$ver" = "latest" ]; then
-			rv_rel+="/latest"
 			name_ver="*"
 		else
-			rv_rel+="/tags/${ver}"
 			name_ver="$ver"
 		fi
 
-		local file
+		local file=""
 		if [ "$tag" = "CLI" ]; then
 			file=$(find "$dir" -maxdepth 1 -name "*cli-${name_ver#v}*.jar" -o -name "*desktop-${name_ver#v}*.jar" -type f 2>/dev/null)
 			local grab_cl="false"
@@ -103,19 +166,23 @@ get_prebuilts() {
 			local grab_cl="true"
 		else abort unreachable; fi
 
-		local url tag_name matches
+		local url="" tag_name="" matches=""
 		if [ "$ver" = "latest" ]; then
 			file=$(grep -v '/[^/]*dev[^/]*$' <<<"$file" | head -1)
 		else
 			file=$(grep "/[^/]*${ver#v}[^/]*\$" <<<"$file" | head -1)
 		fi
 		if [ -z "$file" ]; then
-			local resp asset name
-			resp=$(gh_req "$rv_rel" -) || return 1
+			local resp="" asset="" name=""
+			resp=$(fetch_releases_json "$provider" "$repo_path" "$ver") || return 1
 			tag_name=$(jq -r '.tag_name' <<<"$resp") || return 1
-			matches=$(jq -e '.assets | map(select(.name | (endswith("asc") or endswith("json")) | not))' <<<"$resp") || return 1
+			if [ "$provider" = "gitlab" ]; then
+				matches=$(jq -e '.assets.links | map(select(.name | (endswith("asc") or endswith("json")) | not))' <<<"$resp") || return 1
+			else
+				matches=$(jq -e '.assets | map(select(.name | (endswith("asc") or endswith("json")) | not))' <<<"$resp") || return 1
+			fi
 			if [ "$(jq 'length' <<<"$matches")" -gt 1 ]; then
-				local matches_new
+				local matches_new=""
 				matches_new=$(jq -e -r 'map(select(.name | contains("-dev") | not))' <<<"$matches")
 				if [ "$(jq 'length' <<<"$matches_new")" -eq 1 ]; then
 					matches=$matches_new
@@ -128,7 +195,11 @@ get_prebuilts() {
 				wpr "More than 1 asset was found for this release. Falling back to the first one found..."
 			fi
 			asset=$(jq -r ".[0]" <<<"$matches")
-			url=$(jq -r .url <<<"$asset")
+			if [ "$provider" = "gitlab" ]; then
+				url=$(jq -r '.url // .direct_asset_url' <<<"$asset")
+			else
+				url=$(jq -r .url <<<"$asset")
+			fi
 			name=$(jq -r .name <<<"$asset")
 			if [ "$tag" = "Patches" ]; then
 				local name_ext="${name##*.}"
@@ -136,8 +207,12 @@ get_prebuilts() {
 			fi
 
 			file="${dir}/${name}"
-			gh_dl "$file" "$url" >&2 || return 1
-			echo "$tag: ${src}/${name}  " >>"${cl_dir}/changelog.md"
+			if [ "$provider" = "gitlab" ]; then
+				req "$url" "$file" >&2 || return 1
+			else
+				gh_dl "$file" "$url" >&2 || return 1
+			fi
+			echo "$tag: ${repo_path}/${name}  " >>"${cl_dir}/changelog.md"
 		else
 			local grab_cl="false"
 			name=$(basename "$file")
@@ -146,7 +221,13 @@ get_prebuilts() {
 		fi
 
 		if [ "$tag" = "Patches" ]; then
-			if [ "$grab_cl" = "true" ]; then echo -e "[Changelog](https://github.com/${src}/releases/tag/${tag_name})\n" >>"${cl_dir}/changelog.md"; fi
+			if [ "$grab_cl" = "true" ]; then
+				if [ "$provider" = "gitlab" ]; then
+					echo -e "[Changelog](https://gitlab.com/${repo_path}/-/releases/${tag_name})\n" >>"${cl_dir}/changelog.md"
+				else
+					echo -e "[Changelog](https://github.com/${repo_path}/releases/tag/${tag_name})\n" >>"${cl_dir}/changelog.md"
+				fi
+			fi
 			if [ "$REMOVE_RV_INTEGRATIONS_CHECKS" = "true" ]; then
 				local extensions_ext
 				extensions_ext=$(unzip -l "${file}" "extensions/shared.*" | grep -o "shared\..*") extensions_ext="${extensions_ext#*.}"
@@ -194,23 +275,24 @@ config_update() {
 			if [ "${sources["$PATCHES_SRC/$PATCHES_VER"]}" = 1 ]; then upped+=("$table_name"); fi
 		else
 			sources["$PATCHES_SRC/$PATCHES_VER"]=0
-			local rv_rel="https://api.github.com/repos/${PATCHES_SRC}/releases"
-			if [ "$PATCHES_VER" = "dev" ]; then
-				last_patches=$(gh_req "$rv_rel" - | jq -e -r '.[0]') || continue
-			elif [ "$PATCHES_VER" = "latest" ]; then
-				last_patches=$(gh_req "$rv_rel/latest" -) || continue
-			else
-				last_patches=$(gh_req "$rv_rel/tags/${PATCHES_VER}" -) || continue
-			fi
+			parse_source "$PATCHES_SRC"
+			local cu_provider="$__PARSE_PROVIDER" cu_repo="$__PARSE_REPO"
+			last_patches=$(fetch_releases_json "$cu_provider" "$cu_repo" "$PATCHES_VER") || continue
 			tag_name=$(jq -e -r '.tag_name' <<<"$last_patches") || abort "config_update error: No tag name"
-			if ! last_patches=$(jq -e -r '.assets[] | select(.name | (endswith("asc") or endswith("json")) | not) | .name' <<<"$last_patches"); then
-				abort "config_update error: '$last_patches'"
+			if [ "$cu_provider" = "gitlab" ]; then
+				if ! last_patches=$(jq -e -r '(.assets.links // [])[] | select(.name | (endswith("asc") or endswith("json")) | not) | .name' <<<"$last_patches"); then
+					abort "config_update error: '$last_patches'"
+				fi
+			else
+				if ! last_patches=$(jq -e -r '.assets[] | select(.name | (endswith("asc") or endswith("json")) | not) | .name' <<<"$last_patches"); then
+					abort "config_update error: '$last_patches'"
+				fi
 			fi
 			if [ "$last_patches" ]; then
 				local name_ext="${last_patches##*.}"
 				last_patches="patches-${tag_name#v}.${name_ext}"
 
-				if ! OP=$(grep -m1 "^Patches: ${PATCHES_SRC}/${last_patches}" build.md); then
+				if ! OP=$(grep -m1 "^Patches: ${cu_repo}/${last_patches}" build.md); then
 					sources["$PATCHES_SRC/$PATCHES_VER"]=1
 					prcfg=true
 					upped+=("$table_name")
@@ -354,15 +436,26 @@ isoneof() {
 	return 1
 }
 
-merge_splits() {
-	local bundle=$1 output=$2
-	pr "Merging splits"
+get_apkeditor() {
 	if [ ! -f "$TEMP_DIR/apkeditor.jar" ]; then
 		local resp dlurl
 		resp=$(gh_req "https://api.github.com/repos/REAndroid/APKEditor/releases/latest" -) || return 1
 		dlurl=$(jq -e -r '.assets[] | select(.name | endswith(".jar")) | .browser_download_url' <<<"$resp") || return 1
 		gh_dl "$TEMP_DIR/apkeditor.jar" "$dlurl" >/dev/null || return 1
 	fi
+}
+
+get_apk_version() {
+	local apk=$1
+	get_apkeditor || return 1
+	java -jar "$TEMP_DIR/apkeditor.jar" info -i "$apk" -version-name 2>/dev/null | \
+		sed -n 's/.*VersionName="\([^"]*\)".*/\1/p'
+}
+
+merge_splits() {
+	local bundle=$1 output=$2
+	pr "Merging splits"
+	get_apkeditor || return 1
 	if ! OP=$(java -jar "$TEMP_DIR/apkeditor.jar" merge -i "$bundle" -o "${output}-unsigned" -clean-meta -f 2>&1); then
 		epr "APKEditor error: $OP"
 		return 1
@@ -716,6 +809,17 @@ build_rv() {
 		if [ ! -f "$stock_apk" ]; then
 			epr "Stock apk not found ($stock_apk)"
 			return 0
+		fi
+	fi
+
+	local detected_version=""
+	detected_version=$(get_apk_version "$stock_apk")
+	if [ -n "$detected_version" ]; then
+		if [ "$version" != "$detected_version" ]; then
+			pr "Detected APK version '${detected_version}' (was '${version}') for ${table}"
+			version="$detected_version"
+			version_f=${version// /}
+			version_f=${version_f#v}
 		fi
 	fi
 
