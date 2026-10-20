@@ -17,7 +17,7 @@ arch = "arm64-v8a"
 # apkmirror-dlurl = "https://www.apkmirror.com/apk/google-inc/youtube"
 # uptodown-dlurl = "https://youtube.en.uptodown.com/android"
 # archive-dlurl = "https://archive.org/download/jhc-apks/apks/com.google.android.youtube"
-direct-dlurl = "https://github.com/Aayu1254/apk-vanced/releases/download/latest/com.google.android.apps.youtube-latest-arm64-v8a.apkm"
+direct-dlurl = "https://github.com/Aayu1254/apk-vanced/releases/download/latest/com.google.android.youtube-latest-arm64-v8a.apkm"
 version = "latest"
 
 [Music-Morphe]
