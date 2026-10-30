@@ -1,6 +1,6 @@
 {
-  "version": "vlatest (patches 1.48.0.mpp)",
-  "versionCode": 107,
-  "zipUrl": "https://github.com/Aayu1254/revanced-magisk-module/releases/download/107/youtube-morphe-module-vlatest-arm64-v8a.zip",
+  "version": "vlatest (patches 2.0.0.mpp)",
+  "versionCode": 111,
+  "zipUrl": "https://github.com/Aayu1254/revanced-magisk-module/releases/download/111/youtube-morphe-module-vlatest-arm64-v8a.zip",
   "changelog": "https://raw.githubusercontent.com/Aayu1254/revanced-magisk-module/update/build.md"
 }
