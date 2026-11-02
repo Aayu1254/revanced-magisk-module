@@ -62,7 +62,7 @@ included-patches = "'Enable DCIM folders backup control'"
 version = "latest"
 
 [ProtonVPN-Morphe]
-enabled = false
+# enabled = false
 app-name = "ProtonVPN"
 rv-brand = "Morphe"
 build-mode = "apk"
