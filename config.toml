@@ -6,67 +6,52 @@ parallel-jobs = 1
 
 # you can use rvmm-config-gen to generate a config
 
-
 [YouTube-Morphe]
 app-name = "YouTube"
-patches-source = "MorpheApp/morphe-patches"
-cli-source = "MorpheApp/morphe-desktop"
-rv-brand = "Morphe"
 build-mode = "both"
-arch = "arm64-v8a"
 # apkmirror-dlurl = "https://www.apkmirror.com/apk/google-inc/youtube"
-# uptodown-dlurl = "https://youtube.en.uptodown.com/android"
 # archive-dlurl = "https://archive.org/download/jhc-apks/apks/com.google.android.youtube"
 direct-dlurl = "https://github.com/Aayu1254/apk-vanced/releases/download/latest/com.google.android.youtube-latest-arm64-v8a.apkm"
 version = "latest"
+enable-update-checks = true
 
 [Music-Morphe]
 app-name = "Music"
-patches-source = "MorpheApp/morphe-patches"
-cli-source = "MorpheApp/morphe-desktop"
-rv-brand = "Morphe"
 build-mode = "both"
 arch = "arm64-v8a"
 # apkmirror-dlurl = "https://www.apkmirror.com/apk/google-inc/youtube-music"
-# uptodown-dlurl = "https://youtube-music.en.uptodown.com/android"
 # archive-dlurl = "https://archive.org/download/jhc-apks/apks/com.google.android.apps.youtube.music"
 direct-dlurl = "https://github.com/Aayu1254/apk-vanced/releases/download/latest/com.google.android.apps.youtube.music-latest-arm64-v8a.apk"
 version = "latest"
+enable-update-checks = true
 
 [Reddit-Morphe]
 app-name = "Reddit"
-rv-brand = "Morphe"
 build-mode = "apk"
-arch = "arm64-v8a"
-patches-source = "MorpheApp/morphe-patches"
-cli-source = "MorpheApp/morphe-desktop"
 # apkmirror-dlurl = "https://www.apkmirror.com/apk/redditinc/reddit/"
 # archive-dlurl = "https://archive.org/download/jhc-apks/apks/com.reddit.frontpage"
-# uptodown-dlurl = "https://reddit-official-app.en.uptodown.com/android"
+dpi = "120-640dpi"
 direct-dlurl = "https://github.com/Aayu1254/apk-vanced/releases/download/latest/com.reddit.frontpage-latest-arm64-v8a.apkm"
 version = "latest"
+enable-update-checks = true
 
-[GooglePhotos-Morphe]
+[GooglePhotos]
 build-mode = "apk"
 arch = "arm64-v8a"
-rv-brand = "Morphe"
-cli-source = "MorpheApp/morphe-desktop"
-# cli-version = "dev"
 patches-source = "RookieEnough/De-Vanced"
+rv-brand = "DeVanced"
 # apkmirror-dlurl = "https://www.apkmirror.com/apk/google-inc/photos/"
-# uptodown-dlurl = "https://google-photos.en.uptodown.com/android"
 # archive-dlurl = "https://archive.org/download/jhc-apks/apks/com.google.android.apps.photos"
 direct-dlurl = "https://github.com/Aayu1254/apk-vanced/releases/download/latest/com.google.android.apps.photos-latest-arm64-v8a.apk"
-included-patches = "'Enable DCIM folders backup control'"
 version = "latest"
+enable-update-checks = true
 
 [ProtonVPN-Morphe]
 # enabled = false
 app-name = "ProtonVPN"
-rv-brand = "Morphe"
+rv-brand = "HooDles"
 build-mode = "apk"
 arch = "arm64-v8a"
-cli-source = "MorpheApp/morphe-desktop"
 patches-source = "hoo-dles/morphe-patches"
 direct-dlurl = "https://github.com/Aayu1254/apk-vanced/releases/download/latest/ch.protonvpn.android-latest-arm64-v8a.apk"
 version = "latest"
