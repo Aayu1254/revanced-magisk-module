@@ -9,38 +9,41 @@ parallel-jobs = 1
 [YouTube-Morphe]
 app-name = "YouTube"
 build-mode = "both"
-apkmirror-dlurl = "https://www.apkmirror.com/apk/google-inc/youtube"
-archive-dlurl = "https://archive.org/download/jhc-apks/apks/com.google.android.youtube"
+arch = "arm64-v8a"
+# apkmirror-dlurl = "https://www.apkmirror.com/apk/google-inc/youtube"
+# archive-dlurl = "https://archive.org/download/jhc-apks/apks/com.google.android.youtube"
+direct-dlurl = "https://github.com/Aayu1254/apk-vanced/releases/download/latest/com.google.android.youtube-latest-arm64-v8a.apkm"
+version = "latest"
 enable-update-checks = true
 
 [Music-Morphe]
 app-name = "Music"
 build-mode = "both"
-arch = "both"
-apkmirror-dlurl = "https://www.apkmirror.com/apk/google-inc/youtube-music"
-archive-dlurl = "https://archive.org/download/jhc-apks/apks/com.google.android.apps.youtube.music"
+arch = "arm64-v8a"
+# apkmirror-dlurl = "https://www.apkmirror.com/apk/google-inc/youtube-music"
+# archive-dlurl = "https://archive.org/download/jhc-apks/apks/com.google.android.apps.youtube.music"
+direct-dlurl = "https://github.com/Aayu1254/apk-vanced/releases/download/latest/com.google.android.apps.youtube.music-latest-arm64-v8a.apk"
+version = "latest"
 enable-update-checks = true
 
 [Reddit-Morphe]
 app-name = "Reddit"
 build-mode = "apk"
-apkmirror-dlurl = "https://www.apkmirror.com/apk/redditinc/reddit/"
-archive-dlurl = "https://archive.org/download/jhc-apks/apks/com.reddit.frontpage"
+# apkmirror-dlurl = "https://www.apkmirror.com/apk/redditinc/reddit/"
+# archive-dlurl = "https://archive.org/download/jhc-apks/apks/com.reddit.frontpage"
+direct-dlurl = "https://github.com/Aayu1254/apk-vanced/releases/download/latest/com.reddit.frontpage-latest-arm64-v8a.apkm"
 dpi = "120-640dpi"
+version = "latest"
 enable-update-checks = true
 
 [GooglePhotos]
 build-mode = "both"
 patches-source = "RookieEnough/De-Vanced"
 rv-brand = "DeVanced"
-apkmirror-dlurl = "https://www.apkmirror.com/apk/google-inc/photos/"
-archive-dlurl = "https://archive.org/download/jhc-apks/apks/com.google.android.apps.photos"
-enable-update-checks = true
-
-[Twitter]
-patches-source = "crimera/piko-newx"
-rv-brand = "Piko"
-archive-dlurl = "https://archive.org/download/jhc-apks/apks/com.twitter.android"
+arch = "arm64-v8a"
+# apkmirror-dlurl = "https://www.apkmirror.com/apk/google-inc/photos/"
+# archive-dlurl = "https://archive.org/download/jhc-apks/apks/com.google.android.apps.photos"
+direct-dlurl = "https://github.com/Aayu1254/apk-vanced/releases/download/latest/com.google.android.apps.photos-latest-arm64-v8a.apk"
+included-patches = "'Enable DCIM folders backup control'"
 version = "latest"
-included-patches = "'NewX: Restore Twitter branding'"
 enable-update-checks = true
