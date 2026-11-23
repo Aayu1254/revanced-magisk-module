@@ -50,7 +50,7 @@ mount_rv() {
 		return 1
 	fi
 	VERSION=$(get_app_version)
-	if [ "$VERSION" != "$PKG_VER" ] && [ "$VERSION" ]; then
+	if [ "$VERSION" != "$PKG_VER" ] && [ "$VERSION" ] && [ "$PKG_VER" != "latest" ]; then
 		ch_desc_err "Version mismatch (installed:$VERSION, module:$PKG_VER)"
 		return 1
 	fi

@@ -60,8 +60,10 @@ abort() {
 java() {
 	if [ "${JAVA_HOME_21_X64-}" ]; then
 		env -i JAVA_HOME="$JAVA_HOME_21_X64" "$JAVA_HOME_21_X64"/bin/java --enable-native-access=ALL-UNNAMED "$@"
+	elif [ "${JAVA_HOME-}" ] && [ -f "${JAVA_HOME}/bin/java" ]; then
+		env -i JAVA_HOME="$JAVA_HOME" PATH="$PATH" "${JAVA_HOME}/bin/java" --enable-native-access=ALL-UNNAMED "$@"
 	else
-		env -i java --enable-native-access=ALL-UNNAMED "$@"
+		env -i PATH="$PATH" java --enable-native-access=ALL-UNNAMED "$@"
 	fi
 }
 
@@ -354,15 +356,36 @@ isoneof() {
 	return 1
 }
 
-merge_splits() {
-	local bundle=$1 output=$2
-	pr "Merging splits"
+get_apkeditor() {
 	if [ ! -f "$TEMP_DIR/apkeditor.jar" ]; then
 		local resp dlurl
 		resp=$(gh_req "https://api.github.com/repos/REAndroid/APKEditor/releases/latest" -) || return 1
 		dlurl=$(jq -e -r '.assets[] | select(.name | endswith(".jar")) | .browser_download_url' <<<"$resp") || return 1
 		gh_dl "$TEMP_DIR/apkeditor.jar" "$dlurl" >/dev/null || return 1
 	fi
+}
+
+get_apk_version() {
+	local apk=$1 ver=""
+	if command -v aapt2 >/dev/null 2>&1; then
+		ver=$(aapt2 dump badging "$apk" 2>/dev/null | sed -n "s/.*versionName='\([^']*\)'.*/\1/p" | head -1)
+	elif [ -n "${AAPT2-}" ] && [ -x "${AAPT2-}" ]; then
+		ver=$("$AAPT2" dump badging "$apk" 2>/dev/null | sed -n "s/.*versionName='\([^']*\)'.*/\1/p" | head -1)
+	elif command -v aapt >/dev/null 2>&1; then
+		ver=$(aapt dump badging "$apk" 2>/dev/null | sed -n "s/.*versionName='\([^']*\)'.*/\1/p" | head -1)
+	fi
+	if [ -z "$ver" ]; then
+		if get_apkeditor; then
+			ver=$(java -jar "$TEMP_DIR/apkeditor.jar" info -i "$apk" -version-name 2>/dev/null | sed -n 's/.*[Vv]ersionName="\([^"]*\)".*/\1/p' | head -1)
+		fi
+	fi
+	echo "$ver"
+}
+
+merge_splits() {
+	local bundle=$1 output=$2
+	pr "Merging splits"
+	get_apkeditor || return 1
 	if ! OP=$(java -jar "$TEMP_DIR/apkeditor.jar" merge -i "$bundle" -o "${output}-unsigned" -clean-meta -f 2>&1); then
 		epr "APKEditor error: $OP"
 		return 1
@@ -565,10 +588,22 @@ get_archive_pkg_name() { echo "$__ARCHIVE_PKG_NAME__"; }
 # -------------------- direct --------------------
 dl_direct() {
 	local url=$1 version=${2// /-} output=$3 arch=$4 _dpi=$5
-	if ! grep -q "${version_f#v}-${arch// /}" <<<"$url"; then
-		epr "Given direct-dlurl for $output is not compatible. Set proper 'arch' and 'version' options."
-		return 1
+	local version_f=${version#v}
+	local arch_f="${arch// /}"
+
+	# Check compatibility only if the URL contains version/arch naming scheme
+	if [ "$version" != "latest" ] && grep -q -- "-[0-9]" <<<"$url"; then
+		if ! grep -q "${version_f}" <<<"$url"; then
+			wpr "Given direct-dlurl does not appear to contain version '${version_f}' in filename: $url"
+		fi
 	fi
+	if [ "$arch_f" != "all" ] && grep -q -e "arm64-v8a" -e "armeabi-v7a" -e "arm-v7a" -e "x86_64" -e "x86" <<<"$url"; then
+		if ! grep -q "${arch_f}" <<<"$url" && ! { [ "$arch_f" = "arm-v7a" ] && grep -q "armeabi-v7a" <<<"$url"; }; then
+			epr "Given direct-dlurl for $output has mismatched architecture. Expected '${arch_f}': $url"
+			return 1
+		fi
+	fi
+
 	if [ "${url##*.}" = "apkm" ]; then
 		req "$url" "${output}.apkm" || return 1
 		merge_splits "${output}.apkm" "$output"
@@ -735,6 +770,36 @@ build_rv() {
 			return 0
 		fi
 	fi
+
+	local detected_version
+	if detected_version=$(get_apk_version "$stock_apk") && [ -n "$detected_version" ]; then
+		pr "Detected app version: '$detected_version' for ${table}"
+		if [ "$version" != "$detected_version" ]; then
+			if [ "$version" != "latest" ] && [ "$version" != "auto" ]; then
+				wpr "Downloaded APK version '$detected_version' differs from configured '$version'. Updating to '$detected_version'."
+			fi
+			version="$detected_version"
+			local version_f_new=${version// /}
+			version_f_new=${version_f_new#v}
+			if [ "$version_f" != "$version_f_new" ]; then
+				local new_stock_apk="${TEMP_DIR}/${pkg_name}-${version_f_new}-${arch_f}.apk"
+				if [ -f "$stock_apk" ] && [ "$stock_apk" != "$new_stock_apk" ]; then
+					mv -f "$stock_apk" "$new_stock_apk"
+					if [ -f "${stock_apk}.apkm" ]; then
+						mv -f "${stock_apk}.apkm" "${new_stock_apk}.apkm"
+					fi
+					stock_apk="$new_stock_apk"
+				fi
+				version_f="$version_f_new"
+			fi
+			if [[ ! " ${p_patcher_args[*]} " =~ " -f " ]]; then
+				p_patcher_args+=("-f")
+			fi
+		fi
+	else
+		wpr "Could not detect version from APK, using '${version}'"
+	fi
+
 	log "${table}: ${version}"
 	if [ "${args[patcher_args]}" ]; then p_patcher_args+=("${args[patcher_args]}"); fi
 

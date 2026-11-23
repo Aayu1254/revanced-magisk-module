@@ -45,7 +45,7 @@ fi
 INS=true
 if BASEPATH=$(get_basepath); then
 	VERSION=$(get_app_version)
-	if [ "$VERSION" ] && [ "$VERSION" = "$PKG_VER" ]; then
+	if [ "$VERSION" ] && { [ "$VERSION" = "$PKG_VER" ] || [ "$PKG_VER" = "latest" ]; }; then
 		ui_print "* $PKG_NAME is up-to-date ($VERSION)"
 		INS=false
 	elif [ ! -f "$MODPATH/stock/base.apk" ]; then
